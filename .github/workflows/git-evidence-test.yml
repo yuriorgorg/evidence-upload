@@ -29,7 +29,7 @@ jobs:
 #          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
 
   publish-slim-image:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
