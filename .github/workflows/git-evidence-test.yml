@@ -1,0 +1,54 @@
+# Test workflow for the private JFrog Traceability action.
+# Requires: the action repo (SaharBracha/github-evidence) has
+# Settings → Actions → General → Access set to
+# "Accessible from repositories owned by SaharBracha".
+name: JFrog Traceability (test)
+on:
+  pull_request:
+    types: [closed]
+  push:
+
+permissions:
+  id-token: write       # required for JFrog OIDC + signing
+  contents: write
+  attestations: write   # required by actions/attest-build-provenance
+  actions: write        # detected by attest action for the GHA env
+  packages: write       # for uploading attestations.
+
+jobs:
+  git-evidence:
+    if: github.event.pull_request.merged == true
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: SaharBracha/github-evidence@main
+        with:
+          jf_url: ${{ vars.JF_URL }}
+          oidc-provider-name: yuriorgorg/evidence-upload@github
+          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
+          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
+
+  publish-slim-image:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JFrog CLI
+        id: setup-jfrog-cli
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: https://${{ vars.JF_URL }}
+        with:
+          oidc-provider-name: yuriorgorg/evidence-upload@github
+
+      - name: Build and push slim image
+        env:
+          REGISTRY: ${{ vars.JF_URL }}
+          OIDC_USER: ${{ steps.setup-jfrog-cli.outputs.oidc-user }}
+          OIDC_TOKEN: ${{ steps.setup-jfrog-cli.outputs.oidc-token }}
+        run: |
+          echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
+
+          IMAGE="${REGISTRY}/docker-local/evidence-upload:${GITHUB_SHA}"
+          docker build -t "${IMAGE}" .
+          jf docker push "${IMAGE}"
