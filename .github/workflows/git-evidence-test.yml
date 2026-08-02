@@ -6,10 +6,11 @@ name: JFrog Traceability (test)
 on:
   pull_request:
     types: [closed]
+  push:
 
 permissions:
   id-token: write       # required for JFrog OIDC + signing
-  contents: read
+  contents: write
   attestations: write   # required by actions/attest-build-provenance
   actions: write        # detected by attest action for the GHA env
   packages: write       # for uploading attestations.
