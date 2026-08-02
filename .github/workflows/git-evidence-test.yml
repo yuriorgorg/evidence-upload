@@ -16,17 +16,17 @@ permissions:
   packages: write       # for uploading attestations.
 
 jobs:
-#  git-evidence:
-#    if: github.event.pull_request.merged == true
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: SaharBracha/github-evidence@main
-#        with:
-#          jf_url:              ${{ vars.JF_URL }}
-#          oidc-provider-name: SaharBracha/evidence-test@github
-#          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
-#          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
+  git-evidence:
+    if: github.event.pull_request.merged == true
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: SaharBracha/github-evidence@main
+        with:
+          jf_url: ${{ vars.JF_URL }}
+          oidc-provider-name: yuriorgorg/evidence-upload@github
+          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
+          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
 
   publish-slim-image:
     runs-on: self-hosted
