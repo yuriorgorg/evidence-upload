@@ -36,7 +36,7 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: ${{ vars.JF_URL }}
+          JF_URL: https://${{ vars.JF_URL }}
         with:
           oidc-provider-name: yuriorgorg/evidence-upload@github
 
@@ -49,7 +49,7 @@ jobs:
           REGISTRY="${JF_URL#https://}"
           REGISTRY="${REGISTRY#http://}"
           REGISTRY="${REGISTRY%/}"
-          echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
+          echo "${OIDC_TOKEN}" | docker login "${JF_URL}" -u "${OIDC_USER}" --password-stdin
           
           IMAGE="${REGISTRY}/docker-local/evidence-upload:${GITHUB_SHA}"
           docker build -t "${IMAGE}" .
