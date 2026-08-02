@@ -34,6 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup JFrog CLI
+        id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
         env:
           JF_URL: https://${{ vars.JF_URL }}
@@ -42,15 +43,12 @@ jobs:
 
       - name: Build and push slim image
         env:
-          JF_URL: ${{ vars.JF_URL }}
+          REGISTRY: ${{ vars.JF_URL }}
           OIDC_USER: ${{ steps.setup-jfrog-cli.outputs.oidc-user }}
           OIDC_TOKEN: ${{ steps.setup-jfrog-cli.outputs.oidc-token }}
         run: |
-          REGISTRY="${JF_URL#https://}"
-          REGISTRY="${REGISTRY#http://}"
-          REGISTRY="${REGISTRY%/}"
-          echo "${OIDC_TOKEN}" | docker login "${JF_URL}" -u "${OIDC_USER}" --password-stdin
-          
+          echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
+
           IMAGE="${REGISTRY}/docker-local/evidence-upload:${GITHUB_SHA}"
           docker build -t "${IMAGE}" .
           jf docker push "${IMAGE}"

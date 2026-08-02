@@ -9,6 +9,7 @@ permissions:
 jobs:
   build:
     runs-on: self-hosted
+    if: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
