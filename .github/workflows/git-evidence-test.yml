@@ -62,6 +62,10 @@ jobs:
         run: |
           echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
 
+          echo "----- docker config email(s) -----"
+          jq -r '.auths | to_entries[] | "\(.key): \(.value.email // "no email")"' ~/.docker/config.json || true
+          echo "----- end -----"
+
           IMAGE="${REGISTRY}/docker-local/evidence-upload:${IMAGE_TAG}"
           docker build -t "${IMAGE}" .
           jf docker push "${IMAGE}"
