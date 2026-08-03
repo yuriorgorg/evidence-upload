@@ -16,6 +16,9 @@ permissions:
   actions: write        # detected by attest action for the GHA env
   packages: write       # for uploading attestations.
 
+env:
+  IMAGE_NAME: evidence-upload
+
 jobs:
   evidence-and-publish:
     runs-on: self-hosted
@@ -25,6 +28,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Setup JFrog CLI
         id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
@@ -32,6 +38,7 @@ jobs:
           JF_URL: https://${{ vars.JF_URL }}
         with:
           oidc-provider-name: yuriorgorg/evidence-upload@github
+          version: latest
 
       - name: Bump semver on push to main
         if: github.event_name == 'push'
@@ -53,22 +60,26 @@ jobs:
             echo "tag=pr-${PR_NUMBER}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build and push slim image
-        env:
-          REGISTRY: ${{ vars.JF_URL }}
-          OIDC_USER: ${{ steps.setup-jfrog-cli.outputs.oidc-user }}
-          OIDC_TOKEN: ${{ steps.setup-jfrog-cli.outputs.oidc-token }}
-          IMAGE_TAG: ${{ steps.tag.outputs.tag }}
-        run: |
-          echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
+      - name: Log in to JFrog Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.JF_URL }}
+          username: ${{ steps.setup-jfrog-cli.outputs.oidc-user }}
+          password: ${{ steps.setup-jfrog-cli.outputs.oidc-token }}
 
-          echo "----- docker config email(s) -----"
-          jq -r '.auths | to_entries[] | "\(.key): \(.value.email // "no email")"' ~/.docker/config.json || true
-          echo "----- end -----"
+      - name: Build and push image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
 
-          IMAGE="${REGISTRY}/docker-local/evidence-upload:${IMAGE_TAG}"
-          docker build -t "${IMAGE}" .
-          jf docker push "${IMAGE}"
+#      - name: Attest image provenance
+#        uses: actions/attest-build-provenance@v3
+#        with:
+#          subject-name: oci://${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}
+#          subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
       - name: Attach git evidence
         if: github.event_name == 'push'
