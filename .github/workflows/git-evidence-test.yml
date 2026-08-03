@@ -5,7 +5,9 @@
 name: JFrog Traceability (test)
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
 
 permissions:
   id-token: write       # required for JFrog OIDC + signing
@@ -16,13 +18,12 @@ permissions:
 
 jobs:
   evidence-and-publish:
-    if: >
-      github.event.action != 'closed' ||
-      github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup JFrog CLI
         id: setup-jfrog-cli
@@ -32,22 +33,41 @@ jobs:
         with:
           oidc-provider-name: yuriorgorg/evidence-upload@github
 
+      - name: Bump semver on push to main
+        if: github.event_name == 'push'
+        id: bump
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+
+      - name: Resolve image tag
+        id: tag
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          NEW_VERSION: ${{ steps.bump.outputs.new_version }}
+        run: |
+          if [ -n "${NEW_VERSION}" ]; then
+            echo "tag=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=pr-${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build and push slim image
         env:
           REGISTRY: ${{ vars.JF_URL }}
           OIDC_USER: ${{ steps.setup-jfrog-cli.outputs.oidc-user }}
           OIDC_TOKEN: ${{ steps.setup-jfrog-cli.outputs.oidc-token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IMAGE_TAG: ${{ steps.tag.outputs.tag }}
         run: |
           echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
 
-          TAG="${PR_NUMBER:-${GITHUB_SHA}}"
-          IMAGE="${REGISTRY}/docker-local/evidence-upload:${TAG}"
+          IMAGE="${REGISTRY}/docker-local/evidence-upload:${IMAGE_TAG}"
           docker build -t "${IMAGE}" .
           jf docker push "${IMAGE}"
 
       - name: Attach git evidence
-        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+        if: github.event_name == 'push'
         uses: SaharBracha/github-evidence@main
         with:
           jf_url: ${{ vars.JF_URL }}
