@@ -75,11 +75,11 @@ jobs:
           push: true
           tags: ${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
 
-#      - name: Attest image provenance
-#        uses: actions/attest-build-provenance@v3
-#        with:
-#          subject-name: oci://${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}
-#          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+      - name: Attest image provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: oci://${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
       - name: Attach git evidence
         if: github.event_name == 'push'
