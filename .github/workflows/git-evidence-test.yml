@@ -4,8 +4,7 @@
 # "Accessible from repositories owned by SaharBracha".
 name: JFrog Traceability (test)
 on:
-  pull_request:
-    types: [closed]
+  push:
 
 permissions:
   id-token: write       # required for JFrog OIDC + signing
@@ -16,7 +15,6 @@ permissions:
 
 jobs:
   evidence-and-publish:
-    if: github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -30,14 +28,6 @@ jobs:
         with:
           oidc-provider-name: yuriorgorg/evidence-upload@github
 
-      - name: Attach git evidence
-        uses: SaharBracha/github-evidence@main
-        with:
-          jf_url: ${{ vars.JF_URL }}
-          oidc-provider-name: yuriorgorg/evidence-upload@github
-          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
-          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
-
       - name: Build and push slim image
         env:
           REGISTRY: ${{ vars.JF_URL }}
@@ -47,6 +37,16 @@ jobs:
         run: |
           echo "${OIDC_TOKEN}" | docker login "${REGISTRY}" -u "${OIDC_USER}" --password-stdin
 
-          IMAGE="${REGISTRY}/docker-local/evidence-upload:${PR_NUMBER}"
+          TAG="${PR_NUMBER:-${GITHUB_SHA}}"
+          IMAGE="${REGISTRY}/docker-local/evidence-upload:${TAG}"
           docker build -t "${IMAGE}" .
           jf docker push "${IMAGE}"
+
+      - name: Attach git evidence
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+        uses: SaharBracha/github-evidence@main
+        with:
+          jf_url: ${{ vars.JF_URL }}
+          oidc_provider_name: yuriorgorg/evidence-upload@github
+          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
+          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
