@@ -4,7 +4,8 @@
 # "Accessible from repositories owned by SaharBracha".
 name: JFrog Traceability (test)
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
 
 permissions:
   id-token: write       # required for JFrog OIDC + signing
@@ -15,6 +16,9 @@ permissions:
 
 jobs:
   evidence-and-publish:
+    if: >
+      github.event.action != 'closed' ||
+      github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
       - name: Checkout
