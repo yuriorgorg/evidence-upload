@@ -7,7 +7,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   push:
-    branches: [main]
+    branches: [main, add-branch-protection-rule-evidence]
 
 permissions:
   id-token: write       # required for JFrog OIDC + signing
@@ -150,7 +150,7 @@ jobs:
 #          subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
       - name: Attach git evidence
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/add-branch-protection-rule-evidence'
         uses: SaharBracha/github-evidence@main
         with:
           jf_url: ${{ vars.JF_URL }}
