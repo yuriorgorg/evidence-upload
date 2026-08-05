@@ -12,3 +12,4 @@ dummy commit batch4 #3
 dummy commit batch4 #4
 dummy commit batch4 #5
 dummy commit batch5 #1
+dummy commit batch5 #2
