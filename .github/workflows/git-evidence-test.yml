@@ -5,9 +5,11 @@
 name: JFrog Traceability (test)
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, closed]
   push:
     branches: [main]
+  branch_protection_rule:
+    types: [created, edited, deleted]
 
 permissions:
   id-token: write       # required for JFrog OIDC + signing
@@ -21,6 +23,10 @@ env:
 
 jobs:
   evidence-and-publish:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+       github.event.action != 'closed')
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -149,11 +155,19 @@ jobs:
 #          subject-name: oci://${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}
 #          subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
-      - name: Attach git evidence
-        if: github.event_name == 'push'
-        uses: SaharBracha/github-evidence@main
+  git-evidence:
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      github.event_name == 'branch_protection_rule'
+    runs-on: self-hosted
+    env:
+      APP_KEY: ${{ vars.APP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: SaharBracha/github-evidence@add-branch-protection-rule-evidence
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
           evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
-          evidence_key_alias:  ${{ vars.EVIDENCE_KEY_ALIAS }}
+          evidence_key_alias: ${{ vars.EVIDENCE_KEY_ALIAS }}
