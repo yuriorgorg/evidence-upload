@@ -156,9 +156,6 @@ jobs:
 #          subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
   git-evidence:
-    if: >-
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
-      github.event_name == 'branch_protection_rule'
     runs-on: self-hosted
     env:
       APP_KEY: ${{ vars.APP_KEY }}
