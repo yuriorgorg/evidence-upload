@@ -151,7 +151,7 @@ jobs:
 
       - name: Attach git evidence
         if: github.event_name == 'push' && github.ref == 'refs/heads/add-branch-protection-rule-evidence'
-        uses: SaharBracha/github-evidence@main
+        uses: SaharBracha/github-evidence@add-branch-protection-rule-evidence
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
