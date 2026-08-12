@@ -157,12 +157,10 @@ jobs:
 
   git-evidence:
     runs-on: self-hosted
-    env:
-      APP_KEY: ${{ vars.APP_KEY }}
     steps:
       - uses: actions/checkout@v4
 
-      - uses: SaharBracha/github-evidence@add-branch-protection-rule-evidence
+      - uses: SaharBracha/github-evidence@APP-6300-change-type-to-git-commit
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
