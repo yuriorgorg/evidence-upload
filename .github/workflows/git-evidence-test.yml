@@ -160,7 +160,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: SaharBracha/github-evidence@APP-6300-change-type-to-git-commit
+      - uses: SaharBracha/github-evidence@master
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
