@@ -24,3 +24,4 @@ test line 4
 test line 5
 dummy commit batch6 #1
 dummy commit batch6 #2
+dummy commit batch6 #3
