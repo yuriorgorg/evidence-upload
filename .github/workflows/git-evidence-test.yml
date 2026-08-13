@@ -160,7 +160,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: SaharBracha/github-evidence@main
+      - uses: SaharBracha/github-evidence@APP-0-run-once-on-merged-pr
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
