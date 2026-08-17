@@ -41,10 +41,9 @@ jobs:
         id: setup-jfrog-cli
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: https://${{ vars.JF_URL }}
+          JF_URL: https://z0apptrustswampup.jfrogdev.org
         with:
-          oidc-provider-name: yuriorgorg/evidence-upload@github
-          version: latest
+          oidc-provider-name: github
 
       - name: Bump semver on push to main
         if: github.event_name == 'push'
@@ -162,7 +161,7 @@ jobs:
 
       - uses: SaharBracha/github-evidence@APP-0-run-once-on-merged-pr
         with:
-          jf_url: ${{ vars.JF_URL }}
-          oidc_provider_name: yuriorgorg/evidence-upload@github
+          jf_url: z0apptrustswampup.jfrogdev.org
+          oidc_provider_name: github
           evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
           evidence_key_alias: ${{ vars.EVIDENCE_KEY_ALIAS }}
