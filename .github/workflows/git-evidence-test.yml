@@ -79,7 +79,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ vars.JF_URL }}/docker-local/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+          tags: ${{ vars.JF_URL }}/apptrust-demos-docker-dev-local/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
 
       - name: Create SLSA provenance evidence on image
         env:
@@ -145,7 +145,7 @@ jobs:
             --provider-id github \
             --key ./evidence.key \
             --key-alias "$EVIDENCE_KEY_ALIAS" \
-            --subject-repo-path "docker-local/${IMAGE_NAME}/${IMAGE_TAG}/list.manifest.json"
+            --subject-repo-path "apptrust-demos-docker-dev-local/${IMAGE_NAME}/${IMAGE_TAG}/list.manifest.json"
 
           rm -f evidence.key predicate.json
 
