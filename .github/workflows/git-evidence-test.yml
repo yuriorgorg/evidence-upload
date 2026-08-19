@@ -20,6 +20,7 @@ permissions:
 
 env:
   IMAGE_NAME: evidence-upload
+  EVIDENCE_KEY_ALIAS: github-evidence
 
 jobs:
   evidence-and-publish:
@@ -84,7 +85,7 @@ jobs:
       - name: Create SLSA provenance evidence on image
         env:
           EVIDENCE_KEY: ${{ secrets.EVIDENCE_KEY }}
-          EVIDENCE_KEY_ALIAS: ${{ vars.EVIDENCE_KEY_ALIAS }}
+          EVIDENCE_KEY_ALIAS: ${{ env.EVIDENCE_KEY_ALIAS }}
           IMAGE_TAG: ${{ steps.tag.outputs.tag }}
         run: |
           set -euo pipefail
@@ -165,4 +166,4 @@ jobs:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
           evidence_signing_key: github-evidence
-          evidence_key_alias: ${{ vars.EVIDENCE_KEY_ALIAS }}
+          evidence_key_alias: ${{ env.EVIDENCE_KEY_ALIAS }}
