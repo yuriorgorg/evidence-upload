@@ -157,11 +157,13 @@ jobs:
 #          subject-digest: ${{ steps.build-and-push.outputs.digest }}
 
   git-evidence:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: SaharBracha/github-evidence@main
+      - uses: SaharBracha/github-evidence@APP-0-consumer-controlled-run-trigger
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
