@@ -164,5 +164,5 @@ jobs:
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
-          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
+          evidence_signing_key: github-evidence
           evidence_key_alias: ${{ vars.EVIDENCE_KEY_ALIAS }}
