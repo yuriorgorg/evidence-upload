@@ -1,1 +1,2 @@
 Dummy line for consumer-trigger test at 2026-08-19T15:23:25Z
+Second dummy line at 2026-08-19T15:23:25Z
