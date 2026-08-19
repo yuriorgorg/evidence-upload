@@ -160,9 +160,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: SaharBracha/github-evidence@APP-0-run-once-on-merged-pr
+      - uses: SaharBracha/github-evidence@main
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
-          evidence_signing_key: ${{ secrets.EVIDENCE_KEY }}
+          evidence_signing_key: github-evidence
           evidence_key_alias: ${{ vars.EVIDENCE_KEY_ALIAS }}
