@@ -163,7 +163,7 @@ jobs:
       github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
-      - uses: SaharBracha/github-evidence@APP-0-consumer-controlled-run-trigger
+      - uses: jfrog/JFrog-Traceability@main
         with:
           jf_url: ${{ vars.JF_URL }}
           oidc_provider_name: yuriorgorg/evidence-upload@github
